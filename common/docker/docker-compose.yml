@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+
+  card-status-service:
+    build:
+        context: ../../
+        dockerfile: ./card-status-service/Dockerfile
+    command: uvicorn app.api:app --host 0.0.0.0 --port ${CARD_STATUS_SERVICE_APP_PORT} --reload
+    image: card-status-service:latest
+    volumes:
+      - ../../card-status-service/app:/card-status-service/app
+    env_file:
+      - .env
+    ports:
+      - ${CARD_STATUS_SERVICE_APP_PORT}:${CARD_STATUS_SERVICE_APP_PORT}
+    depends_on:
+      - zywa-db
+    profiles:
+      - card-status-service
+
+
+  zywa-db:
+    image: postgres:latest
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - PGPORT=${DB_PORT}
+    volumes:
+      - ./postgres/init_scripts:/docker-entrypoint-initdb.d
+      - ./postgres/data:/var/lib/postgresql/data
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    profiles:
+      - card-status-service
+      - zywa-db
