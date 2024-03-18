@@ -16,7 +16,7 @@ async def live():
     log.info("[Health check][live]")
     return {"status": "UP"}
 
-@app.get("/{card_id}")
+@app.get("/get_card_status/{card_id}")
 async def get_card_status_by_id(
     card_id: str,
     card_status_db_service: CardStatusDbService = Depends(get_card_status_db_service),
